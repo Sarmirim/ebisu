@@ -14,8 +14,6 @@ Table of Contents
 ## Download 
 ```bash
 git clone https://github.com/Sarmirim/Ebisu.git
-or
-go get github.com/Sarmirim/Ebisu.git
 ```
 
 ---
