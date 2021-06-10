@@ -15,15 +15,21 @@ func Prepare() {
 
 func getENV(name string) string {
 	value := os.Getenv(name)
-	print("BOT token: " + value)
 	return value
+	// return "you_can_add_your_bot_key_on_return"
+}
+
+func printBotName(botName string) {
+	if botName != "" {
+		line := fmt.Sprintf("Authorized on account: %v\n", botName)
+		utils.GreenPrint(line)
+	} else {
+		utils.RedPrint("BOT token: empty")
+	}
 }
 
 func Start() {
 	token := getENV("BOT")
-	if len(token) < 10 {
-		return
-	}
 
 	// TODO: test recover
 	defer func() {
@@ -34,12 +40,12 @@ func Start() {
 
 	bot, err := tgbotapi.NewBotAPI(token)
 	if err != nil {
-		println("ERROR")
+		utils.RedPrint("BOT ERROR")
 	}
 
 	bot.Debug = true
 
-	log.Printf("Authorized on account %s", bot.Self.UserName)
+	printBotName(bot.Self.UserName)
 
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
