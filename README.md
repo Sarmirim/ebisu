@@ -33,7 +33,7 @@ docker-compose up
 
 ## Variables
 ```
-.env/BOT="put your telegram bot key"
+.env/BOT="put your telegram bot key" //works with docker only
 .env/PORT=8765 //by default
 ```
 
