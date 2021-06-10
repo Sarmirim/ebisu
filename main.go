@@ -37,7 +37,7 @@ func slash(c *gin.Context) {
 	c.HTML(http.StatusOK, "index.tmpl", gin.H{
 		"title":   "SLASH",
 		"time":    now,
-		"message": "HELLO WORLD",
+		"message": "WELCOME TO EBISU",
 	})
 }
 
