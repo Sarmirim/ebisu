@@ -1,0 +1,15 @@
+/* HELLO THERE */
+ body {
+    background-color:black;
+    color: white;
+}
+
+h1 {
+    display: flex;
+    justify-content: center;
+}
+
+h2 {
+    display: flex;
+    justify-content: center;
+}

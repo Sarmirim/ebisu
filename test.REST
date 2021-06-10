@@ -1,0 +1,15 @@
+GET http://localhost:8765/api/trade?symbol=iqbnb
+# GET http://localhost:8765/api/ping
+# GET http://localhost:8765/api/time
+
+###
+
+GET https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT
+Content-Type: application/x-www-form-urlencoded
+
+###
+
+GET http://localhost:8765/ws?action=unsubscribe&data=dogeusdt@trade
+# GET http://localhost:8765/ws?action=unsubscribe&data=usdt
+# GET http://localhost:8765/ws?action=listing&data=usdt
+Content-Type: application/x-www-form-urlencoded

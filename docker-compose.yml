@@ -1,0 +1,6 @@
+services:
+    ebisu:
+      build: ./
+      ports:
+        - "${PORT}:8765"
+      restart: always
