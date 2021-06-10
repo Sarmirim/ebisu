@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/sarmirim/ebisu/settings"
 )
 
 type Coin struct {
@@ -110,3 +112,17 @@ func (c *Coin) PriceToFloat() float32 {
 	}
 	return float32(value)
 }
+
+func ColorPrint(value string) {
+	fmt.Println(settings.Red + value + settings.Reset)
+}
+
+func GreenPrint(value string) {
+	ColorPrint(settings.Green + value + settings.Reset)
+}
+
+func RedPrint(value string) {
+	ColorPrint(settings.Red + value + settings.Reset)
+}
+
+// TODO: add generic version of color print (go >= v1.17)
