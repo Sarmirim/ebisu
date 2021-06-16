@@ -1,4 +1,4 @@
-package main
+package db
 
 import (
 	"fmt"
@@ -16,36 +16,41 @@ type Token struct {
 }
 
 var dsn = "host=localhost user=admin password=admin dbname=ebisu port=32000 sslmode=disable TimeZone=Asia/Shanghai"
-var db, _ = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+var DB, _ = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
 func PrintAll() {
-	// dsn := "host=localhost user=admin password=admin dbname=ebisu port=32000 sslmode=disable TimeZone=Asia/Shanghai"
-	// db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	var tokens []Token
-	db.Table("tokens").Select("*").Scan(&tokens)
+	DB.Table("tokens").Select("*").Scan(&tokens)
 	println()
 	for _, value := range tokens {
 		fmt.Println(value)
 	}
 }
 
+func GetTokens() (tokens []Token) {
+	DB.Table("tokens").Select("*").Scan(&tokens)
+	return tokens
+}
+
 func DeleteToken(token *Token) {
-	db.Delete(&Token{}, token.ID)
+	result := DB.Delete(Token{}, &token)
+	PrintAffectedRows(result.RowsAffected)
 }
 
 func AddToken(token *Token) {
-	result := db.Create(&token)
-	println(result.RowsAffected)
+	result := DB.Create(&token)
 	if result.RowsAffected <= 0 {
 		println("ERROR")
+		return
 	}
+	PrintAffectedRows(result.RowsAffected)
 }
 
-func main() {
-	PrintAll()
-	AddToken(&Token{ID: 5, Symbol: "mytest", Time: "2021-06-16 18:39:54+02"})
-	// DeleteToken(&Token{ID: 0})
-	PrintAll()
-	AddToken(&Token{ID: 4, Symbol: "mytest", Time: "2021-06-16 18:39:54+02"})
-	PrintAll()
-}
+// func main() {
+// 	// PrintAll()
+// 	// AddToken(&Token{Symbol: "mytest", Time: "2021-06-16 18:39:54+02"})
+// 	DeleteToken(&Token{ID: 15})
+// 	// PrintAll()
+// 	// AddToken(&Token{ID: 4, Symbol: "mytest", Time: "2021-06-16 18:39:54+02"})
+// 	PrintAll()
+// }
