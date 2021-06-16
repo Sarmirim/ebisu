@@ -10,10 +10,16 @@ import (
 	"github.com/sarmirim/ebisu/api"
 	"github.com/sarmirim/ebisu/bot"
 	"github.com/sarmirim/ebisu/channels"
+	db "github.com/sarmirim/ebisu/gorm"
 	"github.com/sarmirim/ebisu/websocket"
 )
 
 func main() {
+	db.PrintAll()
+	prepare()
+}
+
+func prepare() {
 	// bot launch
 	bot.Prepare()
 	// websocket launch
