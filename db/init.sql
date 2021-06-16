@@ -2,7 +2,7 @@
 -- use mydb;
 
 CREATE TABLE tokens (
-    id INT NOT NULL PRIMARY KEY,
+    id SERIAL NOT NULL PRIMARY KEY,
     symbol TEXT NOT NULL,
     price DOUBLE PRECISION,
     trade TEXT,
