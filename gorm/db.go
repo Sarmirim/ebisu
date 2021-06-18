@@ -37,6 +37,16 @@ func DeleteToken(token *Token) {
 	PrintAffectedRows(result.RowsAffected)
 }
 
+// TODO: make generic in go v1.17
+func BatchDeleteToken(some map[string]interface{}) (result *gorm.DB) {
+	for k, v := range some {
+		query := fmt.Sprintf("%v like '%%%v%%'", k, v)
+		println(query)
+		result = DB.Where(query).Delete(&Token{})
+	}
+	return result
+}
+
 func AddToken(token *Token) {
 	result := DB.Create(&token)
 	if result.RowsAffected <= 0 {
