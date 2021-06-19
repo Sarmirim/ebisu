@@ -16,7 +16,7 @@ var testTokens = []db.Token{
 }
 
 func TestMain(t *testing.T) {
-	db.PrintAll()
+	// db.PrintAll()
 	// t.Error()
 }
 
@@ -53,4 +53,8 @@ func TestDeleteToken(t *testing.T) {
 	// 		"\nTestDeleteToken ERROR",
 	// 	)
 	// }
+}
+
+func TestGetArray(t *testing.T) {
+	db.GetArray("https://api.binance.com/api/v3/ticker/price")
 }

@@ -1,7 +1,10 @@
 package db
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net/http"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -54,6 +57,38 @@ func AddToken(token *Token) {
 		return
 	}
 	PrintAffectedRows(result.RowsAffected)
+}
+
+func GetArray(link string) {
+	client := &http.Client{}
+	newArray := &[]EasyToken{}
+	// newArray := &easyArray{}
+
+	req, err := http.NewRequest("GET", link, nil)
+	if err != nil {
+		println(err)
+	}
+
+	req.Header.Set("User-Agent", "Ebisu")
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		println(err)
+	}
+
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		println(err)
+	}
+
+	er := json.Unmarshal(body, &newArray)
+	if er != nil {
+		fmt.Printf("err = %v\n", er)
+	}
+	fmt.Printf("members = %#v\n", newArray)
+	println("a")
 }
 
 // func main() {
