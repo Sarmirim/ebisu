@@ -19,6 +19,26 @@ func main() {
 	prepare()
 }
 
+func CORS() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// allowedOrigin := os.Getenv("ALLOWED_ORIGIN")
+		// c.Writer.Header().Set("Access-Control-Allow-Origin", allowedOrigin)
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		// c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+
+		// Handle browser preflight requests, where it asks for allowed origin.
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
+
+		c.Next()
+	}
+}
+
 func prepare() {
 	// bot launch
 	bot.Prepare()
@@ -28,6 +48,8 @@ func prepare() {
 
 	// TODO: check jsoniter (gin-gonic/gin/readme.md Build with jsoniter)
 	r := gin.Default()
+	// TODO: make/find solution for CORS
+	r.Use(CORS())
 	r.StaticFile("/favicon.ico", "./resources/favicon.ico")
 	r.LoadHTMLGlob("resources/*")
 	r.Static("/assets", "./assets")
