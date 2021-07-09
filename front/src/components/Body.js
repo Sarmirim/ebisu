@@ -1,9 +1,9 @@
 import { Layout, Menu, Button, notification } from 'antd'
 import { UserOutlined, } from '@ant-design/icons'
 // import { LaptopOutlined, NotificationOutlined } from '@ant-design/icons'
-import { RenderLineChart } from './Charts'
-import { CoinCard } from './Cards'
-import { SearchInput } from './ETC'
+import { RenderLineChart } from './charts'
+import { CoinCard } from './cards'
+import { SearchInput } from './inputs'
 import { useSelector } from 'react-redux'
 import { useDispatch } from 'react-redux'
 
