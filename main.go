@@ -15,7 +15,6 @@ import (
 )
 
 func main() {
-	db.PrintAll()
 	prepare()
 }
 
@@ -41,11 +40,13 @@ func CORS() gin.HandlerFunc {
 
 func prepare() {
 	// bot launch
-	bot.Prepare()
+	go bot.Prepare()
 	// websocket launch
-	go websocket.Start()
+	go websocket.Prepare()
+
 	go channels.Prepare()
 
+	go db.Prepare()
 	// TODO: check jsoniter (gin-gonic/gin/readme.md Build with jsoniter)
 	r := gin.Default()
 	// TODO: make/find solution for CORS
@@ -85,31 +86,19 @@ func websocketAPI(c *gin.Context) {
 		channels.RequestChannel <- *request
 	}()
 
-	go func() {
-		response := <-channels.ResponseChannel
-		fmt.Printf("%+v\n", response)
-
-		if response.ID == newID {
-			c.JSON(200, gin.H{
-				"Action": response.Action,
-				"Data":   response.Data,
-				"Status": response.Status,
-			})
-		}
-	}()
-
 	for {
 		response := <-channels.ResponseChannel
-		fmt.Printf("%+v\n", response)
-		if response.ID == newID {
+		fmt.Printf("resp %+v\n", response)
+		if response.ID == newID { //response.ID == newID
 			c.JSON(200, gin.H{
 				"Action": response.Action,
 				"Data":   response.Data,
 				"Status": response.Status,
 			})
 			return
-		} else {
-			channels.ResponseChannel <- response
 		}
+		// else {
+		// 	channels.ResponseChannel <- response
+		// }
 	}
 }
