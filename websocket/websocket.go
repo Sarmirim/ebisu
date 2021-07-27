@@ -17,11 +17,24 @@ var addr = flag.String("addr", "fstream.binance.com", "Ebisu")
 
 // addr := "stream.binance.com:9443"
 
+var (
+	done = make(chan struct{})
+)
+
 // func main() {
-// 	Start()
+// 	Prepare()
 // }
 
-func Start() {
+type WSController struct {
+	Conn *websocket.Conn
+}
+
+func Prepare() {
+	var ws = new(WSController)
+	ws.Start()
+}
+
+func (ws *WSController) Start() {
 	flag.Parse()
 	log.SetFlags(0)
 
@@ -29,18 +42,17 @@ func Start() {
 	u := url.URL{Scheme: "wss", Host: *addr, Path: connection}
 	log.Printf("connecting to %s", u.String())
 
-	Conn, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
+	var err error
+	ws.Conn, _, err = websocket.DefaultDialer.Dial(u.String(), nil)
 	if err != nil {
 		log.Fatal("dial:", err)
 	}
-	defer Conn.Close()
-
-	done := make(chan struct{})
+	defer ws.Conn.Close()
 
 	go func() {
 		defer close(done)
 		for {
-			_, message, err := Conn.ReadMessage()
+			_, message, err := ws.Conn.ReadMessage()
 			if err != nil {
 				log.Println("read:", err)
 				return
@@ -52,15 +64,17 @@ func Start() {
 				if err := json.Unmarshal(message, &data); err != nil {
 					fmt.Println(err)
 				}
+				log.Printf("\\ws: %s", message)
 			} else {
 				if err := json.Unmarshal(message, &answer); err != nil {
 					fmt.Println(err)
 				}
 				data = answer.Data
-				log.Printf("Websocket: %s", message)
+
+				log.Printf("\\stream: %s", message)
 			}
 
-			if data.Result != nil {
+			if data.ID > 0 {
 				go data.SendToResponseChannel()
 			}
 		}
@@ -71,43 +85,46 @@ func Start() {
 			data := <-channels.RequestChannel
 			switch data.Action {
 			case "subscribe":
-				subErr := Conn.WriteJSON(Sub(data.Data))
+				subErr := ws.Conn.WriteJSON(Sub(data.Data))
 				if subErr != nil {
 					log.Println("Subscription error:", subErr)
 				}
 				data.Status = true
 				channels.ResponseChannel <- data
 			case "unsubscribe":
-				unsubErr := Conn.WriteJSON(Unsub(data.Data))
+				unsubErr := ws.Conn.WriteJSON(Unsub(data.Data))
 				if unsubErr != nil {
 					log.Println("Unsubscription error:", unsubErr)
 				}
 				data.Status = true
 				channels.ResponseChannel <- data
 			case "listing":
-				listSub := Conn.WriteJSON(List())
+				listSub := ws.Conn.WriteJSON(List())
 				if listSub != nil {
 					log.Println("List of subscriptions error:", listSub)
 				}
 				data.Status = true
+				channels.ResponseChannel <- data
 			}
 			fmt.Printf("GlobalChannel websocket info: %+v\n", data)
 		}
 	}()
 
-	ticker := time.NewTicker(time.Second)
+	ticker := time.NewTicker(time.Second * 5)
 	defer ticker.Stop()
 
 	// sub := &structs.JSONStruct{
 	// 	Method: "SUBSCRIBE",
-	// 	Params: []string{""},
+	// 	Params: []string{"btcusdt@trade"},
 	// 	ID:     5}
 
 	// json, _ := json.Marshal(sub)
 	// stringJSON := string(json)
 	// fmt.Println("JSON:", stringJSON)
 
-	// listSub := Conn.WriteJSON(List())
+	// ws.Conn.WriteJSON(Sub("btcusdt@trade"))
+
+	// listSub := ws.Conn.WriteJSON(List())
 	// if listSub != nil {
 	// 	log.Println("List of subscriptions error:", listSub)
 	// }
@@ -116,18 +133,18 @@ func Start() {
 		select {
 		case <-done:
 			return
-		case t := <-ticker.C:
-			err := Conn.WriteMessage(websocket.TextMessage, []byte(t.String()))
-			if err != nil {
-				log.Println("write:", err)
-				return
-			}
+		// case t := <-ticker.C:
+		// 	err := ws.Conn.WriteMessage(websocket.TextMessage, []byte(t.String()))
+		// 	if err != nil {
+		// 		log.Println("write:", err)
+		// 		return
+		// 	}
 		case <-channels.Interrupt:
 			log.Println("interrupt")
 
 			// Cleanly close the connection by sending a close message and then
 			// waiting (with timeout) for the server to close the connection.
-			err := Conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+			err := ws.Conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 			if err != nil {
 				log.Println("write close:", err)
 				return
@@ -136,9 +153,20 @@ func Start() {
 			case <-done:
 			case <-time.After(time.Second):
 			}
+
 			return
 		}
 	}
+}
+
+func (ws *WSController) Stop() {
+	log.Println("ws.Close")
+	err := ws.Conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+	if err != nil {
+		log.Println("write close:", err)
+		return
+	}
+	ws.Conn.Close()
 }
 
 func List() structs.JSONStruct {
