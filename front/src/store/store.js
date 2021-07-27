@@ -7,7 +7,7 @@ export const store = createStore(
     combineReducers({
         coin: coinReducer,
         dots: dotsReducer,
-        theme: themeReducer, 
+        style: themeReducer, 
     }),
     window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__() // work with firefox
 )

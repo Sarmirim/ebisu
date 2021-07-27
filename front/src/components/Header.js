@@ -1,21 +1,157 @@
-import { Layout, Menu } from 'antd'
+import Toolbar from '@material-ui/core/Toolbar'
+import IconButton from '@material-ui/core/IconButton'
+import Typography from '@material-ui/core/Typography'
+import MenuIcon from '@material-ui/icons/Menu'
+import ChevronLeftIcon from '@material-ui/icons/ChevronLeft'
+import MuiDrawer from '@material-ui/core/Drawer'
+import { experimentalStyled as styled } from '@material-ui/core/styles'
+import { useState } from 'react'
+import { mainListItems, secondaryListItems } from './SideMenu'
+import List from '@material-ui/core/List'
+import Divider from '@material-ui/core/Divider'
+import MuiAppBar from '@material-ui/core/AppBar'
+import Box from '@material-ui/core/Box'
+import Container from '@material-ui/core/Container'
+import Grid from '@material-ui/core/Grid'
+import Paper from '@material-ui/core/Paper'
+import CssBaseline from '@material-ui/core/CssBaseline'
+import { RenderLineChart } from './charts'
 import { useSelector } from 'react-redux'
+import { useDispatch } from 'react-redux'
+import { Button } from '@material-ui/core'
+import { CoinCard } from './cards'
+import NotificationsIcon from '@material-ui/icons/Notifications'
+import Badge from '@material-ui/core/Badge'
+import Brightness7Icon from '@material-ui/icons/Brightness7'
+import Brightness4Icon from '@material-ui/icons/Brightness4'
 
-const { Header } = Layout
+const drawerWidth = 240
 
-function MyHeader() {
-    const theme = useSelector((state) => state.theme.theme)
+const AppBar = styled(MuiAppBar, {
+    shouldForwardProp: (prop) => prop !== 'open',
+    })(({ theme, open }) => ({
+        zIndex: theme.zIndex.drawer + 1,
+        transition: theme.transitions.create(['width', 'margin'], {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.leavingScreen,
+        }),
+        ...(open && {
+                marginLeft: drawerWidth,
+                width: `calc(100% - ${drawerWidth}px)`,
+                transition: theme.transitions.create(['width', 'margin'], {
+                    easing: theme.transitions.easing.sharp,
+                    duration: theme.transitions.duration.enteringScreen,
+                }),
+            }),
+    }))
 
-    return <>
-        <Header className="header">
-            <div className="logo" />
-            <Menu theme={theme} mode="horizontal" defaultSelectedKeys={['2']}>
-            <Menu.Item key="1">nav 1</Menu.Item>
-            <Menu.Item key="2">nav 2</Menu.Item>
-            <Menu.Item key="3">nav 3</Menu.Item>
-            </Menu>
-        </Header> 
-    </>
+const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' })(
+    ({ theme, open }) => ({
+        '& .MuiDrawer-paper': {
+                position: 'relative',
+                whiteSpace: 'nowrap',
+                width: drawerWidth,
+                transition: theme.transitions.create('width', {
+                    easing: theme.transitions.easing.sharp,
+                    duration: theme.transitions.duration.enteringScreen,
+            }),
+            boxSizing: 'border-box',
+            ...(!open && {
+                overflowX: 'hidden',
+                transition: theme.transitions.create('width', {
+                    easing: theme.transitions.easing.sharp,
+                    duration: theme.transitions.duration.leavingScreen,
+            }),
+            width: theme.spacing(7),
+            [theme.breakpoints.up('sm')]: {
+                width: theme.spacing(9),
+            },
+            }),
+        },
+    }),
+)
+
+export default function MyHeader() {
+    const [open, setOpen] = useState(false)
+    const toggleDrawer = () => {
+        setOpen(!open)
+    }
+    const dispatch = useDispatch()
+    // const coin = useSelector(state => state.coin)
+    const theme = useSelector(state => state.style.theme)
+
+    const switchTheme = () => {
+        dispatch({type: "theme/changeTheme", payload: theme === 'dark' ? "light" : "dark"})
+    }
+
+    const newData = () => {
+        const payload = [{xAxis: new Date().toLocaleTimeString('ru-RU'), price: Math.round(Math.random() * 1000)}]
+        dispatch({type: "dots/newData", payload: payload})
+    }
+
+    const clearChart = () => {
+        dispatch({type: "dots/clearArray"})
+    }
+
+    return (
+        <Box sx={{ display: 'flex' }}>
+            <CssBaseline />
+            <AppBar position='absolute' open={open}>
+                <Toolbar
+                    sx={{
+                        pr: '24px', // keep right padding when drawer closed
+                    }}
+                >
+                    <IconButton
+                        edge="start"
+                        color="inherit"
+                        aria-label="open drawer"
+                        onClick={toggleDrawer}
+                        sx={{
+                            marginRight: '36px',
+                            ...(open && { display: 'none' }),
+                        }}
+                    >
+                        <MenuIcon />
+                    </IconButton>
+                    <Typography
+                        component="h1"
+                        variant="h6"
+                        color="inherit"
+                        noWrap
+                        sx={{ flexGrow: 1 }}
+                    >
+                        EBISU
+                    </Typography>
+
+                    <IconButton color="inherit" onClick={switchTheme}>
+                        {
+                            theme === 'dark' ? <Brightness4Icon/> : <Brightness7Icon/>
+                        }
+                        {/* <Badge badgeContent={4} color="secondary">
+                        <NotificationsIcon />
+                        </Badge> */}
+                    </IconButton>
+                </Toolbar>
+            </AppBar>
+            <Drawer variant="permanent" open={open}>
+                <Toolbar
+                    sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'flex-end',
+                        px: [1],
+                    }}
+                >
+                    <IconButton onClick={toggleDrawer}>
+                        <ChevronLeftIcon />
+                    </IconButton>
+                </Toolbar>
+                {/* <Divider /> */}
+                <List>{mainListItems}</List>
+                <Divider />
+                <List>{secondaryListItems}</List>
+            </Drawer>
+        </Box>
+    )
 }
-
-export default MyHeader
