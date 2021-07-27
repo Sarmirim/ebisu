@@ -1,0 +1,5 @@
+export const ADD_COIN = "ADD_COIN"
+export const CHANGE_LAST_COIN = "CHANGE_LAST_COIN"
+export const REMOVE_COIN = "REMOVE_COIN"
+export const SWITCH_THEME = "SWITCH_THEME"
+export const SWITCH_SETTINGS = "SWITCH_SETTINGS"
