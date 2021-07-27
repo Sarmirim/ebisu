@@ -18,8 +18,26 @@ type Token struct {
 	Time   string
 }
 
-var dsn = "host=localhost user=admin password=admin dbname=ebisu port=32000 sslmode=disable TimeZone=Asia/Shanghai"
-var DB, _ = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+// var dsn = "host=localhost user=admin password=admin dbname=ebisu port=32000 sslmode=disable TimeZone=Etc/UTC"
+// var DB, ERROR = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+var (
+	dsn   = "host=localhost user=admin password=admin dbname=ebisu port=32001 sslmode=disable TimeZone=Etc/UTC"
+	DB    = &gorm.DB{}
+	ERROR = &DB.Error
+	ERR   = *new(error)
+)
+
+func init() {
+	DB, ERR = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+}
+
+func Prepare() {
+	if ERR != nil {
+		println("DB ERROR")
+	} else {
+		println("DB CONNECTED")
+	}
+}
 
 func PrintAll() {
 	var tokens []Token
@@ -59,6 +77,15 @@ func AddToken(token *Token) {
 	PrintAffectedRows(result.RowsAffected)
 }
 
+func UpdateToken(some map[string]interface{}) (result *gorm.DB) {
+	for k, v := range some {
+		query := fmt.Sprintf("%v = '%v'", k, v)
+		println(query)
+		result = DB.Where(query).Delete(&Token{})
+	}
+	return result
+}
+
 func GetArray(link string) {
 	client := &http.Client{}
 	newArray := &[]EasyToken{}
@@ -89,6 +116,10 @@ func GetArray(link string) {
 	}
 	fmt.Printf("members = %#v\n", newArray)
 	println("a")
+}
+
+func ParseTokensArray(array *[]Token) {
+
 }
 
 // func main() {
